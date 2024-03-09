@@ -59,11 +59,16 @@ router.post("/add", (req, res) => {
 router.delete("/del/:id", (req, res) => {
     const id = req.params.id;
     let sql = "delete from movies where mvid =?";
-    sql = mysql.format(sql,[id]);
-    conn.query(sql,(err, result)=>{
+    sql = mysql.format(sql, [id]);
+    conn.query(sql, (err, result) => {
         if (err) throw err;
-        {
-            res.status(201).json({success: true,result, message:" Delete Success!!"});
+        // เช็คว่ามีข้อมูลที่ถูกลบหรือไม่
+        if (result.affectedRows === 0) {
+            // หากไม่มีข้อมูลถูกลบ ส่งข้อความกลับไปแจ้งว่าไม่พบข้อมูล
+            res.status(404).json({ success: false, message: "ไม่พบข้อมูลที่ต้องการลบ" });
+        } else {
+            // หากมีข้อมูลถูกลบสำเร็จ ส่งข้อมูลการลบกลับไป
+            res.status(201).json({ success: true, result, message: "Delete Success!!" });
         }
     });
 });
